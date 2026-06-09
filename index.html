@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Garment Costing Studio</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <section id="loginScreen" class="login-screen">
+      <div class="login-story">
+        <div class="login-brand">
+          <div class="brand-mark"><svg viewBox="0 0 32 32"><path d="M11 4l5 3 5-3 7 6-4 5-3-2v15H11V13l-3 2-4-5 7-6z" /></svg></div>
+          <strong>Garment Costing Studio</strong>
+        </div>
+        <div class="login-copy">
+          <p class="eyebrow">From tech pack to quote</p>
+          <h1>Build confident garment costs, then find them again.</h1>
+          <p>Keep fabric consumption, development costs, overheads, and client quotes together in one focused workspace.</p>
+        </div>
+        <div class="login-stats">
+          <div><strong>One workspace</strong><span>Cost, quote, save, revisit</span></div>
+          <div><strong>Live calculations</strong><span>Every production input connected</span></div>
+        </div>
+      </div>
+      <form id="loginForm" class="login-form">
+        <div>
+          <p class="eyebrow">Welcome</p>
+          <h2>Sign in to your costing desk</h2>
+        </div>
+        <label>
+          Email
+          <input id="loginEmail" type="email" value="merchandiser@example.com" required />
+        </label>
+        <label>
+          Password
+          <input id="loginPassword" type="password" value="demo1234" required />
+        </label>
+        <button class="primary-btn login-submit" type="submit">Enter workspace</button>
+        <small>Demo login is stored only on this device.</small>
+      </form>
+    </section>
+
+    <section id="dashboardView" class="dashboard-view hidden">
+      <header class="dashboard-header">
+        <div>
+          <p class="eyebrow">Costing workspace</p>
+          <h1>Saved cost sheets</h1>
+        </div>
+        <div class="dashboard-actions">
+          <button id="newSheetBtn" class="primary-btn" type="button">New cost sheet</button>
+          <button id="logoutBtn" class="secondary-light-btn" type="button">Sign out</button>
+        </div>
+      </header>
+      <section class="dashboard-metrics">
+        <article><span>Total sheets</span><strong id="savedSheetCount">0</strong></article>
+        <article><span>Last updated</span><strong id="lastSavedDate">No sheets yet</strong></article>
+        <article><span>Styles tracked</span><strong id="uniqueStyleCount">0</strong></article>
+      </section>
+      <section class="dashboard-list">
+        <div class="section-heading">
+          <div><p class="eyebrow">Library</p><h3>Cost sheet history</h3></div>
+          <input id="sheetSearch" type="search" placeholder="Search style name" />
+        </div>
+        <div id="savedSheetsList" class="saved-sheets-list"></div>
+      </section>
+    </section>
+
+    <main id="calculatorView" class="app-shell hidden">
+      <aside class="sidebar" aria-label="Costing workspace">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" role="img">
+              <path d="M11 4l5 3 5-3 7 6-4 5-3-2v15H11V13l-3 2-4-5 7-6z" />
+            </svg>
+          </div>
+          <div>
+            <p class="eyebrow">Garment Costing</p>
+            <h1>Fabric consumption calculator</h1>
+          </div>
+        </div>
+
+        <label class="upload-box" for="techPackInput">
+          <input id="techPackInput" type="file" accept=".pdf,.txt,.csv,.json,.doc,.docx,.png,.jpg,.jpeg" />
+          <span class="upload-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3v10m0-10 4 4m-4-4-4 4M5 14v5h14v-5" /></svg>
+          </span>
+          <strong>Upload tech pack</strong>
+          <small>PDF, image, doc, CSV, TXT, or JSON</small>
+        </label>
+
+        <div id="fileCard" class="file-card hidden" aria-live="polite">
+          <div>
+            <p id="fileName">No file selected</p>
+            <span id="fileMeta">Waiting for upload</span>
+          </div>
+          <button id="clearFileBtn" class="icon-btn" type="button" aria-label="Clear uploaded file" title="Clear">
+            <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </button>
+        </div>
+
+        <section class="visual-panel" aria-label="Garment panel reference">
+          <svg viewBox="0 0 260 300" role="img" aria-label="Garment pattern diagram">
+            <path class="pattern-piece main" d="M84 38c18 18 42 18 60 0l42 20 30 50-32 18-14-22v152H58V104L44 126 12 108l30-50 42-20z" />
+            <path class="pattern-piece stitch" d="M84 38v58m60-58v58M74 132h110M74 170h110M74 208h110" />
+            <path class="pattern-piece accent" d="M97 45c8 10 41 10 49 0l-13 40h-20L97 45z" />
+            <path class="pattern-piece ghost" d="M196 174c18 0 32 14 32 32v50h-64v-50c0-18 14-32 32-32z" />
+          </svg>
+        </section>
+
+        <div class="sidebar-actions">
+          <button id="dashboardBtn" class="secondary-btn" type="button">Dashboard</button>
+          <button id="saveSheetBtn" class="secondary-btn" type="button">Save sheet</button>
+          <button id="exportBtn" class="secondary-btn" type="button">
+            <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14" /></svg>
+            Export CSV
+          </button>
+          <button id="printBtn" class="secondary-btn" type="button">
+            <svg viewBox="0 0 24 24"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-5h18v5a2 2 0 0 1-2 2h-2M7 14h10v7H7z" /></svg>
+            Print
+          </button>
+        </div>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Cost sheet</p>
+            <h2 id="styleTitle">Style: Oversized Tee</h2>
+          </div>
+          <div class="mode-switch hidden" role="tablist" aria-label="Fabric type">
+            <button class="mode-btn active" data-mode="woven" type="button" role="tab" aria-selected="true">Woven / linear</button>
+            <button class="mode-btn" data-mode="knit" type="button" role="tab" aria-selected="false">Knit / GSM</button>
+          </div>
+        </header>
+
+        <section class="section-band inputs-grid" aria-label="Style and costing inputs">
+          <label>
+            Style name
+            <input id="styleName" type="text" value="Oversized Tee" />
+          </label>
+          <label>
+            Order quantity
+            <input id="orderQty" type="number" min="1" value="1200" />
+          </label>
+          <label>
+            Measurement unit
+            <select id="measurementUnit">
+              <option value="cm">Centimetre</option>
+              <option value="in">Inches</option>
+              <option value="yd">Yards</option>
+            </select>
+          </label>
+          <label>
+            Quote currency
+            <select id="currency"></select>
+          </label>
+          <div class="rate-status" id="rateStatus" aria-live="polite">Exchange rates: checking...</div>
+        </section>
+
+        <section class="section-band table-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Production consumption</p>
+              <h3>Materials & pattern pieces</h3>
+            </div>
+            <div class="section-actions">
+              <button id="addPanelBtn" class="primary-btn" type="button">Add pattern</button>
+              <button id="addFabricBtn" class="secondary-light-btn" type="button">Add direct usage</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fabric / pattern</th>
+                  <th>Method</th>
+                  <th id="panelLengthHeader">Length cm</th>
+                  <th id="panelWidthHeader">Width cm</th>
+                  <th>Pieces</th>
+                  <th id="panelAverageHeader">Average / piece (cm²)</th>
+                  <th>Allowance %</th>
+                  <th>Usage unit</th>
+                  <th id="panelAreaHeader">Total usage</th>
+                  <th id="patternRateHeader">Rate / unit (USD)</th>
+                  <th id="patternCostHeader">Cost / garment (USD)</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="panelRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section-band table-section hidden">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Production materials</p>
+              <h3>Additional fabrics</h3>
+            </div>
+            <button id="legacyAddFabricBtn" class="primary-btn" type="button">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+              Add fabric
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fabric</th>
+                  <th>Usage / garment</th>
+                  <th>Unit</th>
+                  <th>Wastage %</th>
+                  <th id="additionalFabricRateHeader">Rate / unit (USD)</th>
+                  <th id="additionalFabricCostHeader">Cost / garment (USD)</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="fabricRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="results-grid" aria-label="Calculation results">
+          <article class="metric-card">
+            <span id="netAreaLabel">Dimensional usage (cm²)</span>
+            <strong id="netArea">0.00 m²</strong>
+          </article>
+          <article class="metric-card">
+            <span id="consumptionLabel">Direct-use material cost</span>
+            <strong id="consumption">$0.00</strong>
+          </article>
+          <article class="metric-card">
+            <span>Allowance cost impact</span>
+            <strong id="totalFabric">$0.00</strong>
+          </article>
+          <article class="metric-card highlight">
+            <span id="fabricCostLabel">Fabric cost / garment (USD)</span>
+            <strong id="fabricCost">0.00</strong>
+          </article>
+        </section>
+
+        <section class="section-band costing-grid">
+          <div>
+            <p class="eyebrow">Commercials</p>
+            <h3>Cost components</h3>
+          </div>
+          <label>
+            <span id="trimsCostLabel">Trims / garment (USD)</span>
+            <input id="trimsCost" type="number" min="0" step="0.01" value="1.10" />
+          </label>
+          <label>
+            <span id="cmCostLabel">CM / garment (USD)</span>
+            <input id="cmCost" type="number" min="0" step="0.01" value="2.30" />
+          </label>
+          <label>
+            <span id="washCostLabel">Wash / process (USD)</span>
+            <input id="washCost" type="number" min="0" step="0.01" value="0.55" />
+          </label>
+          <label>
+            Overhead method
+            <select id="overheadMode">
+              <option value="percent">Percentage</option>
+              <option id="overheadAmountOption" value="amount">Fixed amount (USD)</option>
+            </select>
+          </label>
+          <label>
+            <span id="overheadLabel">Overhead %</span>
+            <input id="overhead" type="number" min="0" step="0.01" value="8" />
+          </label>
+          <label>
+            Profit %
+            <input id="profit" type="number" min="0" step="0.01" value="15" />
+          </label>
+        </section>
+
+        <section class="section-band table-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Cost components</p>
+              <h3>Additional costs</h3>
+            </div>
+            <button id="addCostBtn" class="primary-btn" type="button">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+              Add cost
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cost item</th>
+                  <th>Classification</th>
+                  <th id="additionalCostAmountHeader">Amount / garment (USD)</th>
+                  <th>Notes</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="additionalCostRows"></tbody>
+            </table>
+          </div>
+          <div class="quote-box quote-box-final">
+            <span id="quotedPriceLabel">Quoted price / garment (USD)</span>
+            <strong id="quotedPrice">$0.00</strong>
+            <small id="orderValue">Order value: $0.00</small>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <template id="panelRowTemplate">
+      <tr>
+        <td><input class="panel-name" type="text" /></td>
+        <td>
+          <select class="panel-method">
+            <option value="dimensions">Dimensions</option>
+            <option value="direct">Direct usage</option>
+          </select>
+        </td>
+        <td><input class="panel-length" type="number" min="0" step="0.1" /></td>
+        <td><input class="panel-width" type="number" min="0" step="0.1" /></td>
+        <td><input class="panel-pieces" type="number" min="1" step="1" /></td>
+        <td class="panel-average">0.000 cm²</td>
+        <td><input class="panel-allowance" type="number" min="0" step="0.1" /></td>
+        <td>
+          <select class="panel-unit">
+            <option value="m2">Square metre</option>
+            <option value="m">Metre</option>
+            <option value="yd">Yard</option>
+            <option value="kg">Kilogram</option>
+            <option value="pc">Piece</option>
+          </select>
+        </td>
+        <td><input class="panel-usage" type="number" min="0" step="0.001" /></td>
+        <td><input class="panel-rate" type="number" min="0" step="0.0001" /></td>
+        <td class="panel-line-cost">$0.00</td>
+        <td>
+          <button class="icon-btn delete-panel" type="button" aria-label="Delete panel" title="Delete panel">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3" /></svg>
+          </button>
+        </td>
+      </tr>
+    </template>
+
+    <template id="fabricRowTemplate">
+      <tr>
+        <td><input class="fabric-name" type="text" /></td>
+        <td><input class="fabric-usage" type="number" min="0" step="0.001" /></td>
+        <td>
+          <select class="fabric-unit">
+            <option value="m">Metre</option>
+            <option value="yd">Yard</option>
+            <option value="kg">Kilogram</option>
+          </select>
+        </td>
+        <td><input class="fabric-wastage" type="number" min="0" step="0.1" /></td>
+        <td><input class="fabric-rate" type="number" min="0" step="0.0001" /></td>
+        <td class="fabric-line-cost">$0.00</td>
+        <td>
+          <button class="icon-btn delete-fabric" type="button" aria-label="Delete fabric" title="Delete fabric">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3" /></svg>
+          </button>
+        </td>
+      </tr>
+    </template>
+
+    <template id="additionalCostRowTemplate">
+      <tr>
+        <td><input class="additional-cost-name" type="text" /></td>
+        <td>
+          <select class="additional-cost-type">
+            <option value="direct">Direct</option>
+            <option value="indirect">Indirect</option>
+          </select>
+        </td>
+        <td><input class="additional-cost-amount" type="number" min="0" step="0.01" /></td>
+        <td><input class="additional-cost-notes" type="text" /></td>
+        <td>
+          <button class="icon-btn delete-additional-cost" type="button" aria-label="Delete additional cost" title="Delete additional cost">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3" /></svg>
+          </button>
+        </td>
+      </tr>
+    </template>
+
+    <div id="toast" class="toast hidden" role="status"></div>
+    <div class="hidden" aria-hidden="true">
+      <span id="fabricWidthLabel"></span><input id="fabricWidth" value="1" />
+      <input id="markerEfficiency" value="100" /><input id="wastage" value="0" />
+      <span id="fabricRateLabel"></span><input id="fabricRate" value="0" />
+      <label id="gsmLabel"><input id="gsm" value="180" /></label>
+    </div>
+    <script src="app.js?v=unified-materials-2"></script>
+  </body>
+</html>
