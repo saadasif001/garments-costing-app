@@ -27,7 +27,6 @@ const state = {
 
 const els = {
   styleName: document.querySelector("#styleName"),
-  customerName: document.querySelector("#customerName"),
   styleTitle: document.querySelector("#styleTitle"),
   orderQty: document.querySelector("#orderQty"),
   measurementUnit: document.querySelector("#measurementUnit"),
@@ -477,7 +476,7 @@ function calculate() {
   els.styleTitle.textContent = `Style: ${els.styleName.value || "Untitled"}`;
   els.printStyleTitle.textContent = `${els.styleName.value || "Untitled"} Cost Sheet`;
   els.printDate.textContent = `Prepared: ${new Date().toLocaleDateString()}`;
-  els.printCurrency.textContent = `Customer: ${els.customerName.value || "Not specified"} · Currency: ${state.currency} · Order: ${qty.toLocaleString()} pcs`;
+  els.printCurrency.textContent = `Currency: ${state.currency} · Order: ${qty.toLocaleString()} pcs`;
 
   document.querySelectorAll("#panelRows tr").forEach((row, index) => {
     const panel = state.panels[index];
@@ -731,7 +730,6 @@ function serializeSheet() {
   return {
     id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
     styleName: els.styleName.value.trim() || "Untitled",
-    customerName: els.customerName.value.trim() || "Not specified",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     state: {
@@ -814,7 +812,6 @@ function loadSheet(id, message = "Opened") {
     state.fabrics = [];
   }
   els.styleName.value = sheet.styleName;
-  els.customerName.value = sheet.customerName || "";
   Object.entries(sheet.inputs).forEach(([key, value]) => {
     if (els[key]) els[key].value = value;
   });
@@ -861,7 +858,7 @@ function printSavedSheet(id) {
 function renderDashboard() {
   const query = els.sheetSearch.value.trim().toLowerCase();
   const sheets = getSavedSheets();
-  const visibleSheets = sheets.filter((sheet) => `${sheet.styleName} ${sheet.customerName || ""}`.toLowerCase().includes(query));
+  const visibleSheets = sheets.filter((sheet) => sheet.styleName.toLowerCase().includes(query));
   els.savedSheetCount.textContent = sheets.length;
   els.uniqueStyleCount.textContent = new Set(sheets.map((sheet) => sheet.styleName.toLowerCase())).size;
   els.lastSavedDate.textContent = sheets[0] ? new Date(sheets[0].updatedAt).toLocaleDateString() : "No sheets yet";
@@ -876,7 +873,7 @@ function renderDashboard() {
     const row = document.createElement("article");
     row.className = "saved-sheet-row";
     row.innerHTML = `
-      <div class="saved-sheet-identity"><p>${escapeHtml(sheet.styleName)}</p><small>${escapeHtml(sheet.customerName || "Not specified")} · ${new Date(sheet.updatedAt).toLocaleDateString()}</small></div>
+      <div class="saved-sheet-identity"><p>${escapeHtml(sheet.styleName)}</p><small>Updated ${new Date(sheet.updatedAt).toLocaleDateString()}</small></div>
       <div class="saved-sheet-value"><span>Total cost</span><strong>${escapeHtml(sheet.totalCost || "—")}</strong></div>
       <div class="saved-sheet-value"><span>Selling price</span><strong>${escapeHtml(sheet.quote || "—")}</strong><small>Profit ${escapeHtml(sheet.profit || "—")}</small></div>
       <div class="saved-sheet-actions">
@@ -908,7 +905,6 @@ function checkDuplicateStyle() {
 function resetNewSheet() {
   currentEditingId = "";
   els.styleName.value = "New Style";
-  els.customerName.value = "";
   duplicateWarningStyle = "";
   showView("calculator");
   calculate();
@@ -1006,7 +1002,6 @@ function exportCsv() {
   const unit = activeUnit();
   const rows = [
     ["Style", els.styleName.value],
-    ["Customer", els.customerName.value],
     ["Measurement unit", activeUnit().name],
     ["Currency", state.currency],
     ["Exchange rate source", els.rateStatus.textContent],
