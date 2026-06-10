@@ -862,7 +862,7 @@ td input {
 @media print {
   @page {
     size: A4 landscape;
-    margin: 7mm;
+    margin: 5mm;
   }
 
   html,
@@ -901,8 +901,8 @@ td input {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    padding-bottom: 3mm;
-    margin-bottom: 3mm;
+    padding-bottom: 1.5mm;
+    margin-bottom: 1.5mm;
     border-bottom: 2px solid #111;
   }
 
@@ -930,7 +930,7 @@ td input {
 
   .section-band,
   .results-grid {
-    margin-bottom: 2mm;
+    margin-bottom: 1mm;
     break-inside: avoid;
   }
 
@@ -940,33 +940,38 @@ td input {
     box-shadow: none;
   }
 
-  .inputs-grid,
-  .costing-grid {
+  .inputs-grid {
     grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 1.5mm;
-    padding: 2mm;
+    gap: 1mm;
+    padding: 1.5mm;
+  }
+
+  .costing-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 1mm;
+    padding: 1.5mm;
   }
 
   .results-grid {
     grid-template-columns: repeat(4, 1fr);
-    gap: 1.5mm;
+    gap: 1mm;
   }
 
   .pricing-summary {
-    grid-template-columns: 0.8fr 1fr 1.8fr;
-    gap: 1.5mm;
-    padding: 2mm;
+    grid-template-columns: 0.65fr 0.9fr 2fr 0.9fr;
+    gap: 1mm;
+    padding: 1.5mm;
   }
 
   .profit-controls {
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5mm;
+    gap: 1mm;
   }
 
   .metric-card {
     min-height: auto;
-    gap: 1mm;
-    padding: 2mm;
+    gap: 0.5mm;
+    padding: 1.3mm;
   }
 
   .metric-card strong,
@@ -980,14 +985,14 @@ td input {
   .subtotal-box,
   .total-cost-box,
   .profit-result {
-    gap: 1mm;
-    padding: 2mm;
+    gap: 0.5mm;
+    padding: 1.3mm;
     border-left-width: 3px;
     break-inside: avoid;
   }
 
   .subtotal-box-wide {
-    margin-top: 2mm;
+    margin-top: 1mm;
   }
 
   .subtotal-box span,
@@ -1007,14 +1012,19 @@ td input {
   }
 
   .table-section {
-    padding: 2mm;
+    padding: 1.5mm;
   }
 
   .section-heading {
-    margin-bottom: 1.5mm;
+    margin-bottom: 0.7mm;
   }
 
   .section-heading h3 {
+    font-size: 11px;
+  }
+
+  .costing-grid h3,
+  .pricing-summary-heading h3 {
     font-size: 11px;
   }
 
@@ -1044,7 +1054,7 @@ td input {
 
   th,
   td {
-    padding: 1mm 0.7mm;
+    padding: 0.55mm 0.5mm;
     border: 1px solid #bbb;
     overflow-wrap: anywhere;
   }
@@ -1092,12 +1102,16 @@ td input {
   }
 
   .quote-box {
-    gap: 1mm;
-    padding: 2mm;
-    margin-top: 2mm;
+    gap: 0.5mm;
+    padding: 1.3mm;
+    margin-top: 0;
     border: 1px solid #777;
     border-left: 4px solid #111;
     background: #eee;
     break-inside: avoid;
+  }
+
+  .quote-box-final {
+    grid-column: auto;
   }
 }
