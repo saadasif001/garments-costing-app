@@ -21,6 +21,7 @@
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: hidden;
   color: var(--ink);
   background:
     linear-gradient(90deg, rgba(15, 118, 110, 0.05) 1px, transparent 1px),
@@ -181,7 +182,7 @@ body {
 
 .saved-sheet-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1.5fr) 1fr 1fr auto;
+  grid-template-columns: minmax(210px, 1.4fr) minmax(130px, 0.7fr) minmax(150px, 0.8fr) minmax(360px, auto);
   gap: 16px;
   align-items: center;
   padding: 16px 8px;
@@ -199,7 +200,29 @@ body {
 
 .saved-sheet-actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
+}
+
+.saved-sheet-value {
+  display: grid;
+  gap: 4px;
+}
+
+.saved-sheet-value span {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.saved-sheet-value strong {
+  font-size: 18px;
+}
+
+.saved-sheet-actions button {
+  min-height: 36px;
+  padding: 0 10px;
 }
 
 .empty-state {
@@ -244,21 +267,22 @@ svg {
 
 .app-shell {
   display: grid;
-  grid-template-columns: 340px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding: 28px;
+  position: relative;
+  height: auto;
+  display: grid;
+  grid-template-columns: minmax(250px, 1.2fr) minmax(220px, 0.9fr) minmax(130px, 0.55fr) minmax(360px, 1.6fr);
+  gap: 14px;
+  align-items: stretch;
+  padding: 16px 28px;
   background: #172321;
   color: #f9fbf8;
-  overflow: auto;
+  overflow: visible;
 }
 
 .brand {
@@ -321,7 +345,7 @@ h3 {
   gap: 8px;
   place-items: center;
   padding: 24px 18px;
-  min-height: 170px;
+  min-height: 112px;
   border: 1px dashed rgba(255, 255, 255, 0.42);
   background: rgba(255, 255, 255, 0.07);
   text-align: center;
@@ -369,16 +393,20 @@ h3 {
 }
 
 .visual-panel {
-  padding: 18px;
-  margin-top: auto;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  margin-top: 0;
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
 }
 
 .visual-panel svg {
   display: block;
-  width: 100%;
-  height: auto;
+  width: auto;
+  height: 112px;
+  max-width: 100%;
 }
 
 .pattern-piece.main {
@@ -410,11 +438,28 @@ h3 {
   gap: 16px;
 }
 
+.sidebar-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  align-content: center;
+}
+
 .workspace {
   display: grid;
   gap: 18px;
   align-content: start;
   padding: 28px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.workspace > *,
+.section-band,
+.table-section,
+.table-wrap {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .topbar {
@@ -541,8 +586,13 @@ select:focus {
 }
 
 .table-wrap {
+  display: block;
   margin-top: 16px;
-  overflow: auto;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
 }
 
 table {
@@ -566,8 +616,15 @@ table {
   min-width: 210px;
 }
 
-#panelRows {
-  min-width: 1480px;
+.materials-table {
+  min-width: 1180px;
+  table-layout: fixed;
+}
+
+.materials-table td input,
+.materials-table td select,
+.materials-table .panel-name {
+  min-width: 0;
 }
 
 th,
@@ -797,10 +854,16 @@ td input {
   .sidebar {
     position: relative;
     height: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .visual-panel {
     display: none;
+  }
+
+  .sidebar-actions {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(4, minmax(120px, 1fr));
   }
 
   .topbar,
@@ -844,6 +907,10 @@ td input {
     padding: 18px;
   }
 
+  .sidebar {
+    grid-template-columns: 1fr;
+  }
+
   .inputs-grid,
   .costing-grid,
   .results-grid,
@@ -856,6 +923,321 @@ td input {
   .mode-btn,
   .sidebar-actions {
     width: 100%;
+  }
+
+  .sidebar-actions {
+    grid-column: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body {
+    background-size: 24px 24px;
+  }
+
+  .login-screen {
+    min-height: 100svh;
+  }
+
+  .login-story {
+    min-height: auto;
+    padding: 26px 20px;
+  }
+
+  .login-copy h1 {
+    font-size: 34px;
+    line-height: 1.05;
+  }
+
+  .login-copy p {
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .login-stats {
+    gap: 14px;
+  }
+
+  .login-form {
+    gap: 16px;
+    padding: 26px 20px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 28px;
+  }
+
+  .dashboard-actions,
+  .saved-sheet-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .dashboard-actions button,
+  .saved-sheet-actions button,
+  .dashboard-list input[type="search"] {
+    width: 100%;
+    max-width: none;
+  }
+
+  .sidebar {
+    gap: 12px;
+    padding: calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) 14px calc(14px + env(safe-area-inset-left));
+  }
+
+  .brand {
+    gap: 10px;
+  }
+
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+  }
+
+  .brand h1 {
+    max-width: none;
+    font-size: 19px;
+  }
+
+  .upload-box {
+    min-height: 96px;
+    padding: 14px;
+  }
+
+  .upload-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .sidebar-actions {
+    gap: 8px;
+  }
+
+  .sidebar-actions .secondary-btn {
+    min-width: 0;
+    min-height: 46px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+
+  .workspace {
+    gap: 12px;
+    padding: 14px calc(14px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
+  }
+
+  .topbar {
+    padding: 2px 0;
+  }
+
+  .topbar h2 {
+    font-size: 23px;
+    overflow-wrap: anywhere;
+  }
+
+  .section-band,
+  .metric-card,
+  .quote-box,
+  .subtotal-box,
+  .total-cost-box,
+  .profit-result {
+    border-radius: 0;
+  }
+
+  .inputs-grid,
+  .costing-grid,
+  .pricing-summary {
+    gap: 12px;
+    padding: 14px;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    min-height: 46px;
+    font-size: 16px;
+  }
+
+  label {
+    gap: 6px;
+  }
+
+  .rate-status {
+    min-height: auto;
+    padding-top: 2px;
+  }
+
+  .table-section {
+    padding: 14px;
+  }
+
+  .section-heading {
+    gap: 12px;
+  }
+
+  .section-heading h3 {
+    font-size: 19px;
+  }
+
+  .section-actions,
+  .cost-entry-flow {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .section-actions button,
+  .cost-entry-flow select,
+  .cost-entry-flow button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .table-wrap {
+    margin-top: 12px;
+    overflow: visible;
+  }
+
+  .materials-table,
+  .additional-costs-table {
+    display: block;
+    min-width: 0;
+  }
+
+  .materials-table thead,
+  .additional-costs-table thead {
+    display: none;
+  }
+
+  .materials-table tbody,
+  .additional-costs-table tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .materials-table tr,
+  .additional-costs-table tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 12px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid var(--line);
+  }
+
+  .materials-table td,
+  .additional-costs-table td {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .materials-table td::before,
+  .additional-costs-table td::before {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .materials-table td:nth-child(1),
+  .materials-table td:nth-child(2),
+  .materials-table td:nth-child(11),
+  .additional-costs-table td:nth-child(1),
+  .additional-costs-table td:nth-child(5) {
+    grid-column: 1 / -1;
+  }
+
+  .materials-table td:nth-child(1)::before { content: "Fabric / pattern"; }
+  .materials-table td:nth-child(2)::before { content: "Method"; }
+  .materials-table td:nth-child(3)::before { content: "Length"; }
+  .materials-table td:nth-child(4)::before { content: "Width"; }
+  .materials-table td:nth-child(5)::before { content: "Pieces"; }
+  .materials-table td:nth-child(6)::before { content: "Average / piece"; }
+  .materials-table td:nth-child(7)::before { content: "Allowance %"; }
+  .materials-table td:nth-child(8)::before { content: "Usage unit"; }
+  .materials-table td:nth-child(9)::before { content: "Total usage"; }
+  .materials-table td:nth-child(10)::before { content: "Rate / unit"; }
+  .materials-table td:nth-child(11)::before { content: "Cost / garment"; }
+  .additional-costs-table td:nth-child(1)::before { content: "Cost item"; }
+  .additional-costs-table td:nth-child(2)::before { content: "Classification"; }
+  .additional-costs-table td:nth-child(3)::before { content: "Cost basis"; }
+  .additional-costs-table td:nth-child(4)::before { content: "Amount / garment"; }
+  .additional-costs-table td:nth-child(5)::before { content: "Notes"; }
+
+  .materials-table td:last-child,
+  .additional-costs-table td:last-child {
+    display: flex;
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+
+  .materials-table td:last-child::before,
+  .additional-costs-table td:last-child::before {
+    display: none;
+  }
+
+  .materials-table .icon-btn,
+  .additional-costs-table .icon-btn {
+    min-height: 42px;
+    width: 46px;
+    color: var(--coral);
+    border-color: rgba(198, 95, 74, 0.35);
+  }
+
+  .panel-area,
+  .panel-line-cost {
+    width: auto;
+    padding: 10px !important;
+    color: var(--teal-dark);
+    background: var(--mist);
+    font-size: 18px;
+  }
+
+  .results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .metric-card {
+    min-height: 104px;
+    gap: 8px;
+    padding: 14px;
+  }
+
+  .metric-card strong {
+    font-size: 22px;
+    overflow-wrap: anywhere;
+  }
+
+  .subtotal-box,
+  .total-cost-box,
+  .profit-result,
+  .quote-box {
+    padding: 14px;
+  }
+
+  .profit-controls {
+    gap: 12px;
+  }
+
+  .quote-box-final {
+    margin-top: 0;
+  }
+
+  .quote-box strong {
+    font-size: 26px;
+    overflow-wrap: anywhere;
+  }
+
+  .toast {
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    max-width: none;
   }
 }
 
@@ -871,7 +1253,7 @@ td input {
     background: #fff;
     color: #111;
     font-family: Arial, sans-serif;
-    font-size: 7.7px;
+    font-size: 8.5px;
   }
 
   .login-screen,
@@ -907,7 +1289,7 @@ td input {
   }
 
   .print-header p {
-    font-size: 8.8px;
+    font-size: 9.5px;
     font-weight: 700;
     text-transform: uppercase;
   }
@@ -915,7 +1297,7 @@ td input {
   .print-header h1 {
     max-width: none;
     margin-top: 1mm;
-    font-size: 19.8px;
+    font-size: 20px;
   }
 
   .print-meta {
@@ -979,7 +1361,7 @@ td input {
   .subtotal-box strong,
   .total-cost-box strong,
   .profit-result strong {
-    font-size: 13.2px;
+    font-size: 14px;
   }
 
   .subtotal-box,
@@ -998,7 +1380,7 @@ td input {
   .subtotal-box span,
   .total-cost-box span,
   .profit-result span {
-    font-size: 6.6px;
+    font-size: 7.2px;
   }
 
   .metric-card.highlight {
@@ -1020,16 +1402,16 @@ td input {
   }
 
   .section-heading h3 {
-    font-size: 11px;
+    font-size: 11.5px;
   }
 
   .costing-grid h3,
   .pricing-summary-heading h3 {
-    font-size: 11px;
+    font-size: 11.5px;
   }
 
   .eyebrow {
-    font-size: 6.6px;
+    font-size: 7.2px;
   }
 
   .table-wrap {
@@ -1041,8 +1423,26 @@ td input {
   #panelRows {
     min-width: 0 !important;
     table-layout: fixed;
-    font-size: 6.6px;
+    font-size: 7.2px;
   }
+
+  .materials-table th:nth-child(1) { width: 14%; }
+  .materials-table th:nth-child(2) { width: 12%; }
+  .materials-table th:nth-child(3),
+  .materials-table th:nth-child(4) { width: 7%; }
+  .materials-table th:nth-child(5),
+  .materials-table th:nth-child(6) { width: 6%; }
+  .materials-table th:nth-child(7) { width: 10%; }
+  .materials-table th:nth-child(8) { width: 8%; }
+  .materials-table th:nth-child(9) { width: 11%; }
+  .materials-table th:nth-child(10),
+  .materials-table th:nth-child(11) { width: 9%; }
+
+  .additional-costs-table th:nth-child(1) { width: 20%; }
+  .additional-costs-table th:nth-child(2),
+  .additional-costs-table th:nth-child(3) { width: 14%; }
+  .additional-costs-table th:nth-child(4) { width: 16%; }
+  .additional-costs-table th:nth-child(5) { width: 36%; }
 
   thead {
     display: table-header-group;
@@ -1054,7 +1454,7 @@ td input {
 
   th,
   td {
-    padding: 0.55mm 0.5mm;
+    padding: 0.75mm 0.6mm;
     border: 1px solid #bbb;
     overflow-wrap: anywhere;
   }
@@ -1067,7 +1467,7 @@ td input {
   th {
     color: #111;
     background: #eee;
-    font-size: 6.05px;
+    font-size: 6.7px;
   }
 
   input,
@@ -1080,7 +1480,7 @@ td input {
     background: transparent !important;
     background-image: none !important;
     box-shadow: none !important;
-    font-size: 6.6px;
+    font-size: 7.2px;
     text-align: left !important;
     appearance: none;
   }
@@ -1094,7 +1494,7 @@ td input {
   label {
     gap: 0.5mm;
     color: #333;
-    font-size: 6.05px;
+    font-size: 6.7px;
   }
 
   label small {

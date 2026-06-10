@@ -3,8 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#172321" />
+    <meta name="application-name" content="Garment Costing Studio" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Costing Studio" />
     <title>Garment Costing Studio</title>
-    <link rel="stylesheet" href="styles.css?v=single-page-print-1" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <link rel="stylesheet" href="styles.css?v=saved-costings-1" />
   </head>
   <body>
     <section id="loginScreen" class="login-screen">
@@ -45,11 +53,10 @@
       <header class="dashboard-header">
         <div>
           <p class="eyebrow">Costing workspace</p>
-          <h1>Saved cost sheets</h1>
+          <h1>Saved Costings</h1>
         </div>
         <div class="dashboard-actions">
-          <button id="newSheetBtn" class="primary-btn" type="button">New cost sheet</button>
-          <button id="logoutBtn" class="secondary-light-btn" type="button">Sign out</button>
+          <button id="newSheetBtn" class="primary-btn" type="button">New Costing</button>
         </div>
       </header>
       <section class="dashboard-metrics">
@@ -59,8 +66,8 @@
       </section>
       <section class="dashboard-list">
         <div class="section-heading">
-          <div><p class="eyebrow">Library</p><h3>Cost sheet history</h3></div>
-          <input id="sheetSearch" type="search" placeholder="Search style name" />
+          <div><p class="eyebrow">Library</p><h3>Saved Costings</h3></div>
+          <input id="sheetSearch" type="search" placeholder="Search style or customer" />
         </div>
         <div id="savedSheetsList" class="saved-sheets-list"></div>
       </section>
@@ -109,8 +116,8 @@
         </section>
 
         <div class="sidebar-actions">
-          <button id="dashboardBtn" class="secondary-btn" type="button">Dashboard</button>
-          <button id="saveSheetBtn" class="secondary-btn" type="button">Save sheet</button>
+          <button id="dashboardBtn" class="secondary-btn" type="button">Saved Costings</button>
+          <button id="saveSheetBtn" class="secondary-btn" type="button">Save Costing</button>
           <button id="exportBtn" class="secondary-btn" type="button">
             <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14" /></svg>
             Export CSV
@@ -150,6 +157,10 @@
             <input id="styleName" type="text" value="Oversized Tee" />
           </label>
           <label>
+            Customer name
+            <input id="customerName" type="text" value="Sample Customer" />
+          </label>
+          <label>
             Order quantity
             <input id="orderQty" type="number" min="1" value="1200" />
           </label>
@@ -180,7 +191,7 @@
             </div>
           </div>
           <div class="table-wrap">
-            <table>
+            <table class="materials-table">
               <thead>
                 <tr>
                   <th>Fabric / pattern</th>
@@ -311,7 +322,7 @@
             </div>
           </div>
           <div class="table-wrap">
-            <table>
+            <table class="additional-costs-table">
               <thead>
                 <tr>
                   <th>Cost item</th>
@@ -467,6 +478,6 @@
       <span id="fabricRateLabel"></span><input id="fabricRate" value="0" />
       <label id="gsmLabel"><input id="gsm" value="180" /></label>
     </div>
-  <script src="app.js?v=pricing-summary-1"></script>
+  <script src="app.js?v=saved-costings-1"></script>
   </body>
 </html>

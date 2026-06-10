@@ -27,6 +27,7 @@ const state = {
 
 const els = {
   styleName: document.querySelector("#styleName"),
+  customerName: document.querySelector("#customerName"),
   styleTitle: document.querySelector("#styleTitle"),
   orderQty: document.querySelector("#orderQty"),
   measurementUnit: document.querySelector("#measurementUnit"),
@@ -122,6 +123,7 @@ const costPresets = {
 let currentUser = "";
 let toastTimer;
 let duplicateWarningStyle = "";
+let currentEditingId = "";
 
 function isEditableField(field) {
   return field instanceof HTMLTextAreaElement
@@ -475,7 +477,7 @@ function calculate() {
   els.styleTitle.textContent = `Style: ${els.styleName.value || "Untitled"}`;
   els.printStyleTitle.textContent = `${els.styleName.value || "Untitled"} Cost Sheet`;
   els.printDate.textContent = `Prepared: ${new Date().toLocaleDateString()}`;
-  els.printCurrency.textContent = `Currency: ${state.currency} · Order: ${qty.toLocaleString()} pcs`;
+  els.printCurrency.textContent = `Customer: ${els.customerName.value || "Not specified"} · Currency: ${state.currency} · Order: ${qty.toLocaleString()} pcs`;
 
   document.querySelectorAll("#panelRows tr").forEach((row, index) => {
     const panel = state.panels[index];
@@ -675,12 +677,23 @@ function updateCurrencyLabels() {
 }
 
 function userSheetsKey() {
-  return `garmentCostingSheets:${currentUser || "demo"}`;
+  return "garmentCostingSavedCostings";
 }
 
 function getSavedSheets() {
   try {
-    return JSON.parse(localStorage.getItem(userSheetsKey()) || "[]");
+    const saved = JSON.parse(localStorage.getItem(userSheetsKey()) || "[]");
+    if (saved.length) return saved;
+    const legacyKeys = Object.keys(localStorage).filter((key) => key.startsWith("garmentCostingSheets:"));
+    const legacy = legacyKeys.flatMap((key) => {
+      try {
+        return JSON.parse(localStorage.getItem(key) || "[]");
+      } catch {
+        return [];
+      }
+    });
+    if (legacy.length) setSavedSheets(legacy);
+    return legacy;
   } catch {
     return [];
   }
@@ -718,6 +731,8 @@ function serializeSheet() {
   return {
     id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
     styleName: els.styleName.value.trim() || "Untitled",
+    customerName: els.customerName.value.trim() || "Not specified",
+    createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     state: {
       mode: state.mode,
@@ -745,6 +760,8 @@ function serializeSheet() {
       profitMode: els.profitMode.value,
       profit: els.profit.value
     },
+    totalCost: els.totalCost.textContent,
+    profit: els.profitResult.textContent,
     quote: els.quotedPrice.textContent
   };
 }
@@ -752,24 +769,28 @@ function serializeSheet() {
 function saveCurrentSheet() {
   const sheets = getSavedSheets();
   const styleName = els.styleName.value.trim() || "Untitled";
-  const existingIndex = sheets.findIndex((sheet) => sheet.styleName.toLowerCase() === styleName.toLowerCase());
+  const existingIndex = sheets.findIndex((sheet) => sheet.id === currentEditingId);
   const sheet = serializeSheet();
 
   if (existingIndex >= 0) {
     sheet.id = sheets[existingIndex].id;
+    sheet.createdAt = sheets[existingIndex].createdAt || sheets[existingIndex].updatedAt;
     sheets[existingIndex] = sheet;
-    showToast(`Updated existing style "${styleName}".`);
+    showToast(`Updated costing "${styleName}".`);
   } else {
     sheets.unshift(sheet);
-    showToast(`Saved "${styleName}" to your dashboard.`);
+    currentEditingId = sheet.id;
+    showToast(`Saved costing "${styleName}".`);
   }
 
   setSavedSheets(sheets);
+  renderDashboard();
 }
 
-function loadSheet(id) {
+function loadSheet(id, message = "Opened") {
   const sheet = getSavedSheets().find((item) => item.id === id);
   if (!sheet) return;
+  currentEditingId = sheet.id;
   Object.assign(state, sheet.state);
   state.panels = (state.panels || []).map((panel) => ({
     method: "dimensions",
@@ -793,6 +814,7 @@ function loadSheet(id) {
     state.fabrics = [];
   }
   els.styleName.value = sheet.styleName;
+  els.customerName.value = sheet.customerName || "";
   Object.entries(sheet.inputs).forEach(([key, value]) => {
     if (els[key]) els[key].value = value;
   });
@@ -807,18 +829,39 @@ function loadSheet(id) {
   updateOverheadMode();
   updateProfitMode();
   showView("calculator");
-  showToast(`Loaded "${sheet.styleName}".`);
+  showToast(`${message} "${sheet.styleName}".`);
 }
 
 function deleteSheet(id) {
   setSavedSheets(getSavedSheets().filter((sheet) => sheet.id !== id));
+  if (currentEditingId === id) currentEditingId = "";
   renderDashboard();
+}
+
+function duplicateSheet(id) {
+  const sheets = getSavedSheets();
+  const source = sheets.find((sheet) => sheet.id === id);
+  if (!source) return;
+  const duplicate = structuredClone(source);
+  duplicate.id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+  duplicate.styleName = `${source.styleName} Copy`;
+  duplicate.createdAt = new Date().toISOString();
+  duplicate.updatedAt = duplicate.createdAt;
+  sheets.unshift(duplicate);
+  setSavedSheets(sheets);
+  renderDashboard();
+  showToast(`Duplicated "${source.styleName}".`);
+}
+
+function printSavedSheet(id) {
+  loadSheet(id, "Prepared");
+  setTimeout(() => window.print(), 100);
 }
 
 function renderDashboard() {
   const query = els.sheetSearch.value.trim().toLowerCase();
   const sheets = getSavedSheets();
-  const visibleSheets = sheets.filter((sheet) => sheet.styleName.toLowerCase().includes(query));
+  const visibleSheets = sheets.filter((sheet) => `${sheet.styleName} ${sheet.customerName || ""}`.toLowerCase().includes(query));
   els.savedSheetCount.textContent = sheets.length;
   els.uniqueStyleCount.textContent = new Set(sheets.map((sheet) => sheet.styleName.toLowerCase())).size;
   els.lastSavedDate.textContent = sheets[0] ? new Date(sheets[0].updatedAt).toLocaleDateString() : "No sheets yet";
@@ -833,14 +876,20 @@ function renderDashboard() {
     const row = document.createElement("article");
     row.className = "saved-sheet-row";
     row.innerHTML = `
-      <div><p>${escapeHtml(sheet.styleName)}</p><small>Updated ${new Date(sheet.updatedAt).toLocaleString()}</small></div>
-      <span>${sheet.state.panels?.length || 0} material rows</span>
-      <strong>${escapeHtml(sheet.quote)}</strong>
+      <div class="saved-sheet-identity"><p>${escapeHtml(sheet.styleName)}</p><small>${escapeHtml(sheet.customerName || "Not specified")} · ${new Date(sheet.updatedAt).toLocaleDateString()}</small></div>
+      <div class="saved-sheet-value"><span>Total cost</span><strong>${escapeHtml(sheet.totalCost || "—")}</strong></div>
+      <div class="saved-sheet-value"><span>Selling price</span><strong>${escapeHtml(sheet.quote || "—")}</strong><small>Profit ${escapeHtml(sheet.profit || "—")}</small></div>
       <div class="saved-sheet-actions">
-        <button class="primary-btn load-sheet" type="button">Open</button>
+        <button class="primary-btn open-sheet" type="button">Open</button>
+        <button class="secondary-light-btn edit-sheet" type="button">Edit</button>
+        <button class="secondary-light-btn duplicate-sheet" type="button">Duplicate</button>
+        <button class="secondary-light-btn print-sheet" type="button">Print</button>
         <button class="secondary-light-btn delete-sheet" type="button">Delete</button>
       </div>`;
-    row.querySelector(".load-sheet").addEventListener("click", () => loadSheet(sheet.id));
+    row.querySelector(".open-sheet").addEventListener("click", () => loadSheet(sheet.id));
+    row.querySelector(".edit-sheet").addEventListener("click", () => loadSheet(sheet.id, "Editing"));
+    row.querySelector(".duplicate-sheet").addEventListener("click", () => duplicateSheet(sheet.id));
+    row.querySelector(".print-sheet").addEventListener("click", () => printSavedSheet(sheet.id));
     row.querySelector(".delete-sheet").addEventListener("click", () => deleteSheet(sheet.id));
     els.savedSheetsList.append(row);
   });
@@ -849,15 +898,17 @@ function renderDashboard() {
 function checkDuplicateStyle() {
   const styleName = els.styleName.value.trim();
   if (!styleName || styleName === duplicateWarningStyle) return;
-  const duplicate = getSavedSheets().some((sheet) => sheet.styleName.toLowerCase() === styleName.toLowerCase());
+  const duplicate = getSavedSheets().some((sheet) => sheet.id !== currentEditingId && sheet.styleName.toLowerCase() === styleName.toLowerCase());
   if (duplicate) {
     duplicateWarningStyle = styleName;
-    showToast(`A saved cost sheet already uses the style name "${styleName}". Saving will update it.`);
+    showToast(`A saved costing already uses "${styleName}". This one will save as a separate record.`);
   }
 }
 
 function resetNewSheet() {
+  currentEditingId = "";
   els.styleName.value = "New Style";
+  els.customerName.value = "";
   duplicateWarningStyle = "";
   showView("calculator");
   calculate();
@@ -955,6 +1006,7 @@ function exportCsv() {
   const unit = activeUnit();
   const rows = [
     ["Style", els.styleName.value],
+    ["Customer", els.customerName.value],
     ["Measurement unit", activeUnit().name],
     ["Currency", state.currency],
     ["Exchange rate source", els.rateStatus.textContent],
@@ -1011,11 +1063,6 @@ document.querySelector("#addCostBtn").addEventListener("click", addAdditionalCos
 document.querySelector("#saveSheetBtn").addEventListener("click", saveCurrentSheet);
 document.querySelector("#dashboardBtn").addEventListener("click", () => showView("dashboard"));
 document.querySelector("#newSheetBtn").addEventListener("click", resetNewSheet);
-document.querySelector("#logoutBtn").addEventListener("click", () => {
-  localStorage.removeItem("garmentCostingCurrentUser");
-  currentUser = "";
-  showView("login");
-});
 document.querySelector("#exportBtn").addEventListener("click", exportCsv);
 document.querySelector("#printBtn").addEventListener("click", () => window.print());
 document.querySelector("#clearFileBtn").addEventListener("click", () => {
@@ -1075,5 +1122,12 @@ configureNumericFields();
 markDemoFields();
 fetchExchangeRates();
 
-currentUser = localStorage.getItem("garmentCostingCurrentUser") || "";
-showView(currentUser ? "dashboard" : "login");
+showView("dashboard");
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {
+      // The app remains usable when service workers are unavailable.
+    });
+  });
+}
