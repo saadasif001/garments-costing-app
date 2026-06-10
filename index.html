@@ -123,6 +123,16 @@
       </aside>
 
       <section class="workspace">
+        <header class="print-header">
+          <div>
+            <p>Garment Costing Studio</p>
+            <h1 id="printStyleTitle">Cost Sheet</h1>
+          </div>
+          <div class="print-meta">
+            <span id="printDate"></span>
+            <span id="printCurrency"></span>
+          </div>
+        </header>
         <header class="topbar">
           <div>
             <p class="eyebrow">Cost sheet</p>
@@ -164,7 +174,7 @@
               <p class="eyebrow">Production consumption</p>
               <h3>Materials & pattern pieces</h3>
             </div>
-            <div class="section-actions">
+            <div class="section-actions screen-only">
               <button id="addPanelBtn" class="primary-btn" type="button">Add pattern</button>
               <button id="addFabricBtn" class="secondary-light-btn" type="button">Add direct usage</button>
             </div>
@@ -248,14 +258,17 @@
           <label>
             <span id="trimsCostLabel">Trims / garment (USD)</span>
             <input id="trimsCost" type="number" min="0" step="0.01" value="1.10" />
+            <small>Basis: per pcs</small>
           </label>
           <label>
             <span id="cmCostLabel">CM / garment (USD)</span>
             <input id="cmCost" type="number" min="0" step="0.01" value="2.30" />
+            <small>Basis: per pcs</small>
           </label>
           <label>
             <span id="washCostLabel">Wash / process (USD)</span>
             <input id="washCost" type="number" min="0" step="0.01" value="0.55" />
+            <small>Basis: per pcs</small>
           </label>
           <label>
             Overhead method
@@ -280,10 +293,22 @@
               <p class="eyebrow">Cost components</p>
               <h3>Additional costs</h3>
             </div>
-            <button id="addCostBtn" class="primary-btn" type="button">
-              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
-              Add cost
-            </button>
+            <div class="cost-entry-flow screen-only">
+              <select id="costPreset" aria-label="Additional cost preset">
+                <option value="embroidery">Embroidery</option>
+                <option value="printing">Printing</option>
+                <option value="packing">Packing</option>
+                <option value="testing">Testing / compliance</option>
+                <option value="freight">Freight / logistics</option>
+                <option value="commission">Commission</option>
+                <option value="development">Product development</option>
+                <option value="other">Other cost</option>
+              </select>
+              <button id="addCostBtn" class="primary-btn" type="button">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+                Add selected cost
+              </button>
+            </div>
           </div>
           <div class="table-wrap">
             <table>
@@ -291,6 +316,7 @@
                 <tr>
                   <th>Cost item</th>
                   <th>Classification</th>
+                  <th>Cost basis</th>
                   <th id="additionalCostAmountHeader">Amount / garment (USD)</th>
                   <th>Notes</th>
                   <th></th>
@@ -313,8 +339,8 @@
         <td><input class="panel-name" type="text" /></td>
         <td>
           <select class="panel-method">
-            <option value="dimensions">Dimensions</option>
-            <option value="direct">Direct usage</option>
+            <option value="dimensions">Pattern dimensions</option>
+            <option value="direct">Direct consumption</option>
           </select>
         </td>
         <td><input class="panel-length" type="number" min="0" step="0.1" /></td>
@@ -325,10 +351,14 @@
         <td>
           <select class="panel-unit">
             <option value="m2">Square metre</option>
-            <option value="m">Metre</option>
-            <option value="yd">Yard</option>
-            <option value="kg">Kilogram</option>
-            <option value="pc">Piece</option>
+            <option value="pc">pcs</option>
+            <option value="doz">dozen</option>
+            <option value="m">meter</option>
+            <option value="yd">yard</option>
+            <option value="kg">kg</option>
+            <option value="g">gram</option>
+            <option value="in">inch</option>
+            <option value="cm">cm</option>
           </select>
         </td>
         <td><input class="panel-usage" type="number" min="0" step="0.001" /></td>
@@ -373,6 +403,20 @@
             <option value="indirect">Indirect</option>
           </select>
         </td>
+        <td>
+          <select class="additional-cost-unit">
+            <option value="pc">per pcs</option>
+            <option value="doz">per dozen</option>
+            <option value="m">per meter</option>
+            <option value="yd">per yard</option>
+            <option value="kg">per kg</option>
+            <option value="g">per gram</option>
+            <option value="in">per inch</option>
+            <option value="cm">per cm</option>
+            <option value="percent">percent</option>
+            <option value="fixed">fixed amount</option>
+          </select>
+        </td>
         <td><input class="additional-cost-amount" type="number" min="0" step="0.01" /></td>
         <td><input class="additional-cost-notes" type="text" /></td>
         <td>
@@ -390,6 +434,6 @@
       <span id="fabricRateLabel"></span><input id="fabricRate" value="0" />
       <label id="gsmLabel"><input id="gsm" value="180" /></label>
     </div>
-    <script src="app.js?v=unified-materials-2"></script>
+    <script src="app.js?v=merchandiser-ux-print-3"></script>
   </body>
 </html>

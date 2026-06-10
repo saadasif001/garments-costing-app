@@ -10,7 +10,7 @@ const state = {
   fabricRatePerKg: 4.75,
   fabrics: [],
   additionalCosts: [
-    { name: "Sample development", type: "indirect", amount: 0.25, notes: "Amortized per garment" }
+    { name: "Sample development", type: "indirect", unit: "pc", amount: 0.25, notes: "Amortized per garment" }
   ],
   trimsCost: 1.10,
   cmCost: 2.30,
@@ -55,6 +55,7 @@ const els = {
   additionalFabricCostHeader: document.querySelector("#additionalFabricCostHeader"),
   additionalCostRows: document.querySelector("#additionalCostRows"),
   additionalCostRowTemplate: document.querySelector("#additionalCostRowTemplate"),
+  costPreset: document.querySelector("#costPreset"),
   additionalCostAmountHeader: document.querySelector("#additionalCostAmountHeader"),
   trimsCostLabel: document.querySelector("#trimsCostLabel"),
   cmCostLabel: document.querySelector("#cmCostLabel"),
@@ -89,12 +90,83 @@ const els = {
   savedSheetCount: document.querySelector("#savedSheetCount"),
   uniqueStyleCount: document.querySelector("#uniqueStyleCount"),
   lastSavedDate: document.querySelector("#lastSavedDate"),
-  toast: document.querySelector("#toast")
+  toast: document.querySelector("#toast"),
+  printStyleTitle: document.querySelector("#printStyleTitle"),
+  printDate: document.querySelector("#printDate"),
+  printCurrency: document.querySelector("#printCurrency")
+};
+
+const costPresets = {
+  embroidery: { name: "Embroidery", type: "direct", unit: "pc", notes: "Per garment embroidery cost" },
+  printing: { name: "Printing", type: "direct", unit: "pc", notes: "Per garment print cost" },
+  packing: { name: "Packing", type: "direct", unit: "pc", notes: "Polybag, carton and packing" },
+  testing: { name: "Testing / compliance", type: "indirect", unit: "fixed", notes: "Amortized laboratory and compliance cost" },
+  freight: { name: "Freight / logistics", type: "indirect", unit: "pc", notes: "Allocated logistics cost" },
+  commission: { name: "Commission", type: "indirect", unit: "percent", notes: "Enter converted per-garment amount" },
+  development: { name: "Product development", type: "indirect", unit: "fixed", notes: "Amortized sampling and development" },
+  other: { name: "Other cost", type: "direct", unit: "pc", notes: "" }
 };
 
 let currentUser = "";
 let toastTimer;
 let duplicateWarningStyle = "";
+
+function isEditableField(field) {
+  return field instanceof HTMLTextAreaElement
+    || (field instanceof HTMLInputElement && !["file", "hidden", "checkbox", "radio", "button", "submit"].includes(field.type));
+}
+
+function configureNumericFields(root = document) {
+  const fields = root.matches?.('input[type="number"]') ? [root] : root.querySelectorAll('input[type="number"]');
+  fields.forEach((field) => {
+    field.type = "text";
+    field.inputMode = "decimal";
+    field.dataset.numeric = "true";
+    field.autocomplete = "off";
+  });
+}
+
+function markDemoFields(root = document) {
+  const fields = root.matches?.("input, textarea") ? [root] : root.querySelectorAll("input, textarea");
+  fields.forEach((field) => {
+    if (!isEditableField(field) || field.value === "") return;
+    field.dataset.demoValue = field.value;
+    field.dataset.demoPending = "true";
+  });
+}
+
+function selectDemoField(field) {
+  if (!isEditableField(field) || field.dataset.demoPending !== "true" || field.value !== field.dataset.demoValue) return;
+
+  field.dataset.demoPending = "false";
+  setTimeout(() => {
+    try {
+      field.select();
+    } catch {
+      // Some browser-managed input types do not expose a selectable text range.
+    }
+  }, 0);
+}
+
+document.addEventListener("focusin", (event) => {
+  selectDemoField(event.target);
+});
+
+document.addEventListener("click", (event) => {
+  selectDemoField(event.target);
+});
+
+document.addEventListener("input", (event) => {
+  const field = event.target;
+  if (!isEditableField(field)) return;
+  field.dataset.demoPending = "false";
+  if (field.dataset.numeric === "true") {
+    const raw = field.value.replace(/[^\d.-]/g, "").replace(/(?!^)-/g, "");
+    const [whole, ...fraction] = raw.split(".");
+    const cleaned = fraction.length ? `${whole}.${fraction.join("")}` : whole;
+    if (cleaned !== field.value) field.value = cleaned;
+  }
+});
 
 const currencyOptions = [
   ["AED", "UAE Dirham"], ["AFN", "Afghan Afghani"], ["ALL", "Albanian Lek"], ["AMD", "Armenian Dram"],
@@ -361,6 +433,9 @@ function calculate() {
   els.quotedPrice.textContent = quoteMoney(quoted);
   els.orderValue.textContent = `Order value: ${quoteMoney(quoted * qty)}`;
   els.styleTitle.textContent = `Style: ${els.styleName.value || "Untitled"}`;
+  els.printStyleTitle.textContent = `${els.styleName.value || "Untitled"} Cost Sheet`;
+  els.printDate.textContent = `Prepared: ${new Date().toLocaleDateString()}`;
+  els.printCurrency.textContent = `Currency: ${state.currency} · Order: ${qty.toLocaleString()} pcs`;
 
   document.querySelectorAll("#panelRows tr").forEach((row, index) => {
     const panel = state.panels[index];
@@ -373,15 +448,18 @@ function renderPanels() {
   els.panelRows.innerHTML = "";
   state.panels.forEach((panel, index) => {
     const row = els.rowTemplate.content.firstElementChild.cloneNode(true);
+    row.classList.toggle("direct-consumption-row", panel.method === "direct");
     row.querySelector(".panel-name").value = panel.name;
     row.querySelector(".panel-method").value = panel.method || "dimensions";
-    row.querySelector(".panel-length").value = formatMeasurement(panel.length);
-    row.querySelector(".panel-width").value = formatMeasurement(panel.width);
+    row.querySelector(".panel-length").value = panel.method === "direct" ? "" : formatMeasurement(panel.length);
+    row.querySelector(".panel-width").value = panel.method === "direct" ? "" : formatMeasurement(panel.width);
     row.querySelector(".panel-pieces").value = panel.pieces;
     row.querySelector(".panel-allowance").value = panel.allowance;
     row.querySelector(".panel-unit").value = panel.unit || "m2";
     row.querySelector(".panel-usage").value = panel.method === "direct" ? panel.usage : Number(panelUsage(panel).toFixed(4));
     row.querySelector(".panel-rate").value = formatCurrencyInput(panel.rate);
+    row.querySelector(".panel-usage").placeholder = panel.method === "direct" ? "Usage per garment" : "Calculated";
+    row.querySelector(".panel-rate").placeholder = "Rate per selected unit";
     row.querySelector(".panel-usage").disabled = panel.method !== "direct";
     row.querySelector(".panel-length").disabled = panel.method === "direct";
     row.querySelector(".panel-width").disabled = panel.method === "direct";
@@ -419,6 +497,7 @@ function renderPanels() {
     });
 
     els.panelRows.append(row);
+    configureNumericFields(row);
   });
   calculate();
 }
@@ -426,6 +505,8 @@ function renderPanels() {
 function addPanel(panel = { name: "New panel", length: 20, width: 20, pieces: 1, allowance: 3 }) {
   state.panels.push({ method: "dimensions", unit: "m2", usage: 0, rate: 1, ...panel });
   renderPanels();
+  markDemoFields(els.panelRows.lastElementChild);
+  els.panelRows.lastElementChild.querySelector(".panel-name").focus();
 }
 
 function renderFabrics() {
@@ -459,6 +540,7 @@ function renderFabrics() {
     });
 
     els.fabricRows.append(row);
+    configureNumericFields(row);
   });
   calculate();
 }
@@ -466,6 +548,8 @@ function renderFabrics() {
 function addFabric() {
   state.panels.push({ name: "New direct-use fabric", method: "direct", length: 0, width: 0, pieces: 1, allowance: 5, unit: "m", usage: 0.1, rate: 1 });
   renderPanels();
+  markDemoFields(els.panelRows.lastElementChild);
+  els.panelRows.lastElementChild.querySelector(".panel-name").focus();
 }
 
 function renderAdditionalCosts() {
@@ -474,6 +558,7 @@ function renderAdditionalCosts() {
     const row = els.additionalCostRowTemplate.content.firstElementChild.cloneNode(true);
     row.querySelector(".additional-cost-name").value = cost.name;
     row.querySelector(".additional-cost-type").value = cost.type;
+    row.querySelector(".additional-cost-unit").value = cost.unit || "pc";
     row.querySelector(".additional-cost-amount").value = formatCurrencyInput(cost.amount);
     row.querySelector(".additional-cost-notes").value = cost.notes;
 
@@ -482,6 +567,7 @@ function renderAdditionalCosts() {
         state.additionalCosts[index] = {
           name: row.querySelector(".additional-cost-name").value,
           type: row.querySelector(".additional-cost-type").value,
+          unit: row.querySelector(".additional-cost-unit").value,
           amount: num(row.querySelector(".additional-cost-amount").value) / activeFx(),
           notes: row.querySelector(".additional-cost-notes").value
         };
@@ -498,13 +584,17 @@ function renderAdditionalCosts() {
     });
 
     els.additionalCostRows.append(row);
+    configureNumericFields(row);
   });
   calculate();
 }
 
 function addAdditionalCost() {
-  state.additionalCosts.push({ name: "New cost", type: "direct", amount: 0, notes: "" });
+  const preset = costPresets[els.costPreset.value] || costPresets.other;
+  state.additionalCosts.push({ ...preset, amount: 0 });
   renderAdditionalCosts();
+  markDemoFields(els.additionalCostRows.lastElementChild);
+  els.additionalCostRows.lastElementChild.querySelector(".additional-cost-amount").focus();
 }
 
 function updateOverheadMode() {
@@ -715,6 +805,7 @@ function resetNewSheet() {
   duplicateWarningStyle = "";
   showView("calculator");
   calculate();
+  markDemoFields(els.styleName);
 }
 
 function setMeasurementUnit(unit) {
@@ -830,8 +921,8 @@ function exportCsv() {
     ]),
     [],
     ["Additional costs"],
-    ["Cost item", "Classification", `Amount / garment ${state.currency}`, "Notes"],
-    ...state.additionalCosts.map((cost) => [cost.name, cost.type, formatCurrencyInput(cost.amount), cost.notes]),
+    ["Cost item", "Classification", "Cost basis", `Amount / garment ${state.currency}`, "Notes"],
+    ...state.additionalCosts.map((cost) => [cost.name, cost.type, cost.unit || "pc", formatCurrencyInput(cost.amount), cost.notes]),
     [`Additional cost total ${state.currency}`, formatCurrencyInput(additionalCostTotal())],
     ["Overhead method", els.overheadMode.value],
     ["Overhead value", els.overheadMode.value === "amount" ? formatCurrencyInput(state.overheadAmount) : els.overhead.value],
@@ -917,6 +1008,8 @@ renderAdditionalCosts();
 renderCommercialInputs();
 updateCurrencyLabels();
 updateOverheadMode();
+configureNumericFields();
+markDemoFields();
 fetchExchangeRates();
 
 currentUser = localStorage.getItem("garmentCostingCurrentUser") || "";

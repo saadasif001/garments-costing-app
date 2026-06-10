@@ -223,7 +223,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -477,7 +478,8 @@ label {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-height: 40px;
   padding: 9px 10px;
@@ -504,6 +506,22 @@ select {
 input:focus {
   border-color: var(--teal);
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.13);
+}
+
+input[data-numeric="true"] {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+input[data-numeric="true"]:focus {
+  text-align: left;
+}
+
+label small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: none;
 }
 
 input:disabled,
@@ -538,6 +556,16 @@ table {
   gap: 8px;
 }
 
+.cost-entry-flow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cost-entry-flow select {
+  min-width: 210px;
+}
+
 #panelRows {
   min-width: 1480px;
 }
@@ -562,6 +590,10 @@ td input {
 
 .panel-name {
   min-width: 160px;
+}
+
+.direct-consumption-row {
+  background: rgba(217, 155, 52, 0.06);
 }
 
 .panel-area {
@@ -624,6 +656,10 @@ td input {
 
 .quote-box-final {
   margin-top: 18px;
+}
+
+.print-header {
+  display: none;
 }
 
 .primary-btn,
@@ -755,27 +791,211 @@ td input {
 }
 
 @media print {
-  body {
-    background: #fff;
+  @page {
+    size: A4 landscape;
+    margin: 7mm;
   }
 
+  html,
+  body {
+    width: 100%;
+    background: #fff;
+    color: #111;
+    font-family: Arial, sans-serif;
+    font-size: 7px;
+  }
+
+  .login-screen,
+  .dashboard-view,
   .sidebar,
   .primary-btn,
+  .secondary-light-btn,
   .icon-btn,
-  .mode-switch {
+  .mode-switch,
+  .screen-only,
+  .rate-status,
+  .toast {
     display: none !important;
   }
 
   .app-shell {
     display: block;
+    min-height: auto;
   }
 
   .workspace {
+    display: block;
     padding: 0;
+  }
+
+  .print-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-bottom: 3mm;
+    margin-bottom: 3mm;
+    border-bottom: 2px solid #111;
+  }
+
+  .print-header p {
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .print-header h1 {
+    max-width: none;
+    margin-top: 1mm;
+    font-size: 18px;
+  }
+
+  .print-meta {
+    display: grid;
+    gap: 1mm;
+    text-align: right;
+  }
+
+  .topbar {
+    display: none;
+  }
+
+  .section-band,
+  .results-grid {
+    margin-bottom: 2mm;
+    break-inside: avoid;
   }
 
   .metric-card,
   .section-band {
+    border-color: #aaa;
     box-shadow: none;
+  }
+
+  .inputs-grid,
+  .costing-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 1.5mm;
+    padding: 2mm;
+  }
+
+  .results-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5mm;
+  }
+
+  .metric-card {
+    min-height: auto;
+    gap: 1mm;
+    padding: 2mm;
+  }
+
+  .metric-card strong,
+  .quote-box strong {
+    font-size: 12px;
+  }
+
+  .metric-card.highlight {
+    color: #111;
+    background: #eee;
+    border-color: #777;
+  }
+
+  .metric-card.highlight span {
+    color: #333;
+  }
+
+  .table-section {
+    padding: 2mm;
+  }
+
+  .section-heading {
+    margin-bottom: 1.5mm;
+  }
+
+  .section-heading h3 {
+    font-size: 10px;
+  }
+
+  .eyebrow {
+    font-size: 6px;
+  }
+
+  .table-wrap {
+    margin-top: 0;
+    overflow: visible;
+  }
+
+  table,
+  #panelRows {
+    min-width: 0 !important;
+    table-layout: fixed;
+    font-size: 6px;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+
+  th,
+  td {
+    padding: 1mm 0.7mm;
+    border: 1px solid #bbb;
+    overflow-wrap: anywhere;
+  }
+
+  th:last-child,
+  td:last-child {
+    display: none;
+  }
+
+  th {
+    color: #111;
+    background: #eee;
+    font-size: 5.5px;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    color: #111;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    font-size: 6px;
+    text-align: left !important;
+    appearance: none;
+  }
+
+  input:disabled,
+  select:disabled {
+    color: #333;
+    background: transparent;
+  }
+
+  label {
+    gap: 0.5mm;
+    color: #333;
+    font-size: 5.5px;
+  }
+
+  label small {
+    display: none;
+  }
+
+  .quote-box {
+    gap: 1mm;
+    padding: 2mm;
+    margin-top: 2mm;
+    border: 1px solid #777;
+    border-left: 4px solid #111;
+    background: #eee;
+    break-inside: avoid;
   }
 }
