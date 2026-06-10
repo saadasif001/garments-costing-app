@@ -1,9 +1,9 @@
-const CACHE_NAME = "garment-costing-studio-v5";
+const CACHE_NAME = "garment-costing-studio-v6";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles-v5.css",
-  "./app-v5.js",
+  "./styles-v6.css",
+  "./app-v6.js",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
