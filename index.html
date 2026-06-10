@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Garment Costing Studio</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=pricing-summary-1" />
   </head>
   <body>
     <section id="loginScreen" class="login-screen">
@@ -281,10 +281,10 @@
             <span id="overheadLabel">Overhead %</span>
             <input id="overhead" type="number" min="0" step="0.01" value="8" />
           </label>
-          <label>
-            Profit %
-            <input id="profit" type="number" min="0" step="0.01" value="15" />
-          </label>
+          <div class="subtotal-box">
+            <span id="costComponentTotalLabel">Cost components total (USD)</span>
+            <strong id="costComponentTotal">$0.00</strong>
+          </div>
         </section>
 
         <section class="section-band table-section">
@@ -324,6 +324,39 @@
               </thead>
               <tbody id="additionalCostRows"></tbody>
             </table>
+          </div>
+          <div class="subtotal-box subtotal-box-wide">
+            <span id="additionalCostTotalLabel">Additional costs total (USD)</span>
+            <strong id="additionalCostTotal">$0.00</strong>
+          </div>
+        </section>
+
+        <section class="section-band pricing-summary">
+          <div class="pricing-summary-heading">
+            <p class="eyebrow">Final calculation</p>
+            <h3>Total cost & quoted price</h3>
+          </div>
+          <div class="total-cost-box">
+            <span id="totalCostLabel">Total cost / garment (USD)</span>
+            <strong id="totalCost">$0.00</strong>
+            <small>Fabric + cost components + additional costs</small>
+          </div>
+          <div class="profit-controls">
+            <label>
+              Profit method
+              <select id="profitMode">
+                <option value="percent">Percentage</option>
+                <option id="profitAmountOption" value="amount">Fixed amount (USD)</option>
+              </select>
+            </label>
+            <label>
+              <span id="profitLabel">Profit %</span>
+              <input id="profit" type="number" min="0" step="0.01" value="15" />
+            </label>
+            <div class="profit-result">
+              <span id="profitResultLabel">Profit amount (USD)</span>
+              <strong id="profitResult">$0.00</strong>
+            </div>
           </div>
           <div class="quote-box quote-box-final">
             <span id="quotedPriceLabel">Quoted price / garment (USD)</span>
@@ -434,6 +467,6 @@
       <span id="fabricRateLabel"></span><input id="fabricRate" value="0" />
       <label id="gsmLabel"><input id="gsm" value="180" /></label>
     </div>
-    <script src="app.js?v=merchandiser-ux-print-3"></script>
+  <script src="app.js?v=pricing-summary-1"></script>
   </body>
 </html>

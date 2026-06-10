@@ -16,6 +16,7 @@ const state = {
   cmCost: 2.30,
   washCost: 0.55,
   overheadAmount: 8,
+  profitAmount: 0,
   panels: [
     { name: "Shell fabric - front", method: "dimensions", length: 74, width: 58, pieces: 1, allowance: 3, unit: "m2", usage: 0, rate: 4.75 },
     { name: "Shell fabric - back", method: "dimensions", length: 76, width: 58, pieces: 1, allowance: 3, unit: "m2", usage: 0, rate: 4.75 },
@@ -46,7 +47,18 @@ const els = {
   overheadLabel: document.querySelector("#overheadLabel"),
   overheadAmountOption: document.querySelector("#overheadAmountOption"),
   overhead: document.querySelector("#overhead"),
+  profitMode: document.querySelector("#profitMode"),
+  profitLabel: document.querySelector("#profitLabel"),
+  profitAmountOption: document.querySelector("#profitAmountOption"),
   profit: document.querySelector("#profit"),
+  profitResultLabel: document.querySelector("#profitResultLabel"),
+  profitResult: document.querySelector("#profitResult"),
+  costComponentTotalLabel: document.querySelector("#costComponentTotalLabel"),
+  costComponentTotal: document.querySelector("#costComponentTotal"),
+  additionalCostTotalLabel: document.querySelector("#additionalCostTotalLabel"),
+  additionalCostTotal: document.querySelector("#additionalCostTotal"),
+  totalCostLabel: document.querySelector("#totalCostLabel"),
+  totalCost: document.querySelector("#totalCost"),
   panelRows: document.querySelector("#panelRows"),
   rowTemplate: document.querySelector("#panelRowTemplate"),
   fabricRows: document.querySelector("#fabricRows"),
@@ -124,6 +136,7 @@ function configureNumericFields(root = document) {
     field.dataset.numeric = "true";
     field.autocomplete = "off";
   });
+  markDemoFields(root);
 }
 
 function markDemoFields(root = document) {
@@ -147,6 +160,20 @@ function selectDemoField(field) {
     }
   }, 0);
 }
+
+document.addEventListener("pointerdown", (event) => {
+  const field = event.target;
+  if (!isEditableField(field) || field.disabled || field.readOnly) return;
+
+  // Explicit focus keeps first-click editing reliable in scrollable and rebuilt table rows.
+  if (document.activeElement !== field) {
+    try {
+      field.focus({ preventScroll: true });
+    } catch {
+      field.focus();
+    }
+  }
+});
 
 document.addEventListener("focusin", (event) => {
   selectDemoField(event.target);
@@ -269,6 +296,9 @@ function syncCommercialInputs() {
   if (els.overheadMode.value === "amount") {
     state.overheadAmount = num(els.overhead.value) / fx;
   }
+  if (els.profitMode.value === "amount") {
+    state.profitAmount = num(els.profit.value) / fx;
+  }
 }
 
 function formatCurrencyInput(value) {
@@ -281,6 +311,9 @@ function renderCommercialInputs() {
   els.washCost.value = formatCurrencyInput(state.washCost);
   if (els.overheadMode.value === "amount") {
     els.overhead.value = formatCurrencyInput(state.overheadAmount);
+  }
+  if (els.profitMode.value === "amount") {
+    els.profit.value = formatCurrencyInput(state.profitAmount);
   }
 }
 
@@ -421,15 +454,22 @@ function calculate() {
   const directCost = state.panels.filter((panel) => panel.method === "direct").reduce((sum, panel) => sum + panelLineCost(panel), 0);
   const allowanceCost = state.panels.reduce((sum, panel) => sum + (panelUsage(panel) - panelBaseUsage(panel)) * num(panel.rate), 0);
   const fabricCost = state.panels.reduce((sum, panel) => sum + panelLineCost(panel), 0);
-  const baseCost = fabricCost + state.trimsCost + state.cmCost + state.washCost + additionalCostTotal();
+  const additionalCosts = additionalCostTotal();
+  const baseCost = fabricCost + state.trimsCost + state.cmCost + state.washCost + additionalCosts;
   const overheadAmount = els.overheadMode.value === "amount" ? state.overheadAmount : baseCost * num(els.overhead.value) / 100;
-  const withOverhead = baseCost + overheadAmount;
-  const quoted = withOverhead * (1 + num(els.profit.value) / 100);
+  const componentTotal = state.trimsCost + state.cmCost + state.washCost + overheadAmount;
+  const totalCost = fabricCost + componentTotal + additionalCosts;
+  const profitAmount = els.profitMode.value === "amount" ? state.profitAmount : totalCost * num(els.profit.value) / 100;
+  const quoted = totalCost + profitAmount;
 
   els.netArea.textContent = formatArea(dimensionalArea);
   els.consumption.textContent = quoteMoney(directCost);
   els.totalFabric.textContent = quoteMoney(allowanceCost);
   els.fabricCost.textContent = quoteMoney(fabricCost);
+  els.costComponentTotal.textContent = quoteMoney(componentTotal);
+  els.additionalCostTotal.textContent = quoteMoney(additionalCosts);
+  els.totalCost.textContent = quoteMoney(totalCost);
+  els.profitResult.textContent = quoteMoney(profitAmount);
   els.quotedPrice.textContent = quoteMoney(quoted);
   els.orderValue.textContent = `Order value: ${quoteMoney(quoted * qty)}`;
   els.styleTitle.textContent = `Style: ${els.styleName.value || "Untitled"}`;
@@ -605,6 +645,13 @@ function updateOverheadMode() {
   calculate();
 }
 
+function updateProfitMode() {
+  const fixed = els.profitMode.value === "amount";
+  els.profitLabel.textContent = fixed ? `Profit amount (${state.currency})` : "Profit %";
+  if (fixed) els.profit.value = formatCurrencyInput(state.profitAmount);
+  calculate();
+}
+
 function updateCurrencyLabels() {
   const currency = state.currency;
   els.additionalFabricRateHeader.textContent = `Rate / unit (${currency})`;
@@ -616,8 +663,14 @@ function updateCurrencyLabels() {
   els.washCostLabel.textContent = `Wash / process (${currency})`;
   els.overheadAmountOption.textContent = `Fixed amount (${currency})`;
   els.overheadLabel.textContent = els.overheadMode.value === "amount" ? `Overhead amount (${currency})` : "Overhead %";
+  els.profitAmountOption.textContent = `Fixed amount (${currency})`;
+  els.profitLabel.textContent = els.profitMode.value === "amount" ? `Profit amount (${currency})` : "Profit %";
+  els.profitResultLabel.textContent = `Profit amount (${currency})`;
   els.additionalCostAmountHeader.textContent = `Amount / garment (${currency})`;
   els.fabricCostLabel.textContent = `Fabric cost / garment (${currency})`;
+  els.costComponentTotalLabel.textContent = `Cost components total (${currency})`;
+  els.additionalCostTotalLabel.textContent = `Additional costs total (${currency})`;
+  els.totalCostLabel.textContent = `Total cost / garment (${currency})`;
   els.quotedPriceLabel.textContent = `Quoted price / garment (${currency})`;
 }
 
@@ -677,6 +730,7 @@ function serializeSheet() {
       cmCost: state.cmCost,
       washCost: state.washCost,
       overheadAmount: state.overheadAmount,
+      profitAmount: state.profitAmount,
       panels: structuredClone(state.panels),
       fabrics: structuredClone(state.fabrics),
       additionalCosts: structuredClone(state.additionalCosts)
@@ -688,6 +742,7 @@ function serializeSheet() {
       gsm: els.gsm.value,
       overheadMode: els.overheadMode.value,
       overhead: els.overheadMode.value === "percent" ? els.overhead.value : "",
+      profitMode: els.profitMode.value,
       profit: els.profit.value
     },
     quote: els.quotedPrice.textContent
@@ -750,6 +805,7 @@ function loadSheet(id) {
   renderAdditionalCosts();
   updateCurrencyLabels();
   updateOverheadMode();
+  updateProfitMode();
   showView("calculator");
   showToast(`Loaded "${sheet.styleName}".`);
 }
@@ -923,14 +979,19 @@ function exportCsv() {
     ["Additional costs"],
     ["Cost item", "Classification", "Cost basis", `Amount / garment ${state.currency}`, "Notes"],
     ...state.additionalCosts.map((cost) => [cost.name, cost.type, cost.unit || "pc", formatCurrencyInput(cost.amount), cost.notes]),
-    [`Additional cost total ${state.currency}`, formatCurrencyInput(additionalCostTotal())],
+    [`Cost components total ${state.currency}`, els.costComponentTotal.textContent],
+    [`Additional costs total ${state.currency}`, els.additionalCostTotal.textContent],
     ["Overhead method", els.overheadMode.value],
     ["Overhead value", els.overheadMode.value === "amount" ? formatCurrencyInput(state.overheadAmount) : els.overhead.value],
+    ["Profit method", els.profitMode.value],
+    ["Profit value", els.profit.value],
     [],
     ["Dimensional usage", els.netArea.textContent],
     ["Direct-use material cost", els.consumption.textContent],
     ["Allowance cost impact", els.totalFabric.textContent],
     ["Fabric cost", els.fabricCost.textContent],
+    ["Total cost", els.totalCost.textContent],
+    ["Profit amount", els.profitResult.textContent],
     ["Quoted price", els.quotedPrice.textContent]
   ];
 
@@ -978,6 +1039,7 @@ els.currency.addEventListener("change", () => {
 });
 
 els.overheadMode.addEventListener("change", updateOverheadMode);
+els.profitMode.addEventListener("change", updateProfitMode);
 els.sheetSearch.addEventListener("input", renderDashboard);
 els.styleName.addEventListener("input", checkDuplicateStyle);
 
@@ -1008,6 +1070,7 @@ renderAdditionalCosts();
 renderCommercialInputs();
 updateCurrencyLabels();
 updateOverheadMode();
+updateProfitMode();
 configureNumericFields();
 markDemoFields();
 fetchExchangeRates();

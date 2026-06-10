@@ -654,7 +654,68 @@ td input {
   font-size: 30px;
 }
 
+.subtotal-box,
+.total-cost-box,
+.profit-result {
+  display: grid;
+  gap: 8px;
+  align-content: center;
+  padding: 14px 18px;
+  background: var(--soft);
+  border-left: 5px solid var(--teal);
+}
+
+.subtotal-box span,
+.total-cost-box span,
+.profit-result span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.subtotal-box strong,
+.total-cost-box strong,
+.profit-result strong {
+  font-size: 24px;
+}
+
+.subtotal-box-wide {
+  margin-top: 18px;
+}
+
+.pricing-summary {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(220px, 1fr) minmax(360px, 1.5fr);
+  gap: 18px;
+  padding: 18px;
+}
+
+.pricing-summary-heading {
+  align-self: center;
+}
+
+.total-cost-box {
+  background: #edf7f5;
+  border-left-color: var(--teal-dark);
+}
+
+.total-cost-box small {
+  color: var(--muted);
+}
+
+.profit-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(130px, 1fr));
+  gap: 14px;
+}
+
+.profit-result {
+  border-left-color: var(--amber);
+}
+
 .quote-box-final {
+  grid-column: 1 / -1;
   margin-top: 18px;
 }
 
@@ -750,8 +811,14 @@ td input {
 
   .inputs-grid,
   .costing-grid,
-  .results-grid {
+  .results-grid,
+  .pricing-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profit-controls,
+  .quote-box-final {
+    grid-column: 1 / -1;
   }
 }
 
@@ -779,7 +846,9 @@ td input {
 
   .inputs-grid,
   .costing-grid,
-  .results-grid {
+  .results-grid,
+  .pricing-summary,
+  .profit-controls {
     grid-template-columns: 1fr;
   }
 
@@ -802,7 +871,7 @@ td input {
     background: #fff;
     color: #111;
     font-family: Arial, sans-serif;
-    font-size: 7px;
+    font-size: 7.7px;
   }
 
   .login-screen,
@@ -838,7 +907,7 @@ td input {
   }
 
   .print-header p {
-    font-size: 8px;
+    font-size: 8.8px;
     font-weight: 700;
     text-transform: uppercase;
   }
@@ -846,7 +915,7 @@ td input {
   .print-header h1 {
     max-width: none;
     margin-top: 1mm;
-    font-size: 18px;
+    font-size: 19.8px;
   }
 
   .print-meta {
@@ -883,6 +952,17 @@ td input {
     gap: 1.5mm;
   }
 
+  .pricing-summary {
+    grid-template-columns: 0.8fr 1fr 1.8fr;
+    gap: 1.5mm;
+    padding: 2mm;
+  }
+
+  .profit-controls {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5mm;
+  }
+
   .metric-card {
     min-height: auto;
     gap: 1mm;
@@ -890,8 +970,30 @@ td input {
   }
 
   .metric-card strong,
-  .quote-box strong {
-    font-size: 12px;
+  .quote-box strong,
+  .subtotal-box strong,
+  .total-cost-box strong,
+  .profit-result strong {
+    font-size: 13.2px;
+  }
+
+  .subtotal-box,
+  .total-cost-box,
+  .profit-result {
+    gap: 1mm;
+    padding: 2mm;
+    border-left-width: 3px;
+    break-inside: avoid;
+  }
+
+  .subtotal-box-wide {
+    margin-top: 2mm;
+  }
+
+  .subtotal-box span,
+  .total-cost-box span,
+  .profit-result span {
+    font-size: 6.6px;
   }
 
   .metric-card.highlight {
@@ -913,11 +1015,11 @@ td input {
   }
 
   .section-heading h3 {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .eyebrow {
-    font-size: 6px;
+    font-size: 6.6px;
   }
 
   .table-wrap {
@@ -929,7 +1031,7 @@ td input {
   #panelRows {
     min-width: 0 !important;
     table-layout: fixed;
-    font-size: 6px;
+    font-size: 6.6px;
   }
 
   thead {
@@ -955,7 +1057,7 @@ td input {
   th {
     color: #111;
     background: #eee;
-    font-size: 5.5px;
+    font-size: 6.05px;
   }
 
   input,
@@ -968,7 +1070,7 @@ td input {
     background: transparent !important;
     background-image: none !important;
     box-shadow: none !important;
-    font-size: 6px;
+    font-size: 6.6px;
     text-align: left !important;
     appearance: none;
   }
@@ -982,7 +1084,7 @@ td input {
   label {
     gap: 0.5mm;
     color: #333;
-    font-size: 5.5px;
+    font-size: 6.05px;
   }
 
   label small {
